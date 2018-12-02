@@ -17,6 +17,7 @@ fn main() {
         "day01a" => read_stdin_and_report_result(aoc18::day01::resulting_frequency),
         "day01b" => read_stdin_and_report_result(aoc18::day01::resulting_frequency_twice),
         "day02a" => read_stdin_and_report_result(aoc18::day02::checksum),
+        "day02b" => read_stdin_and_report_result(aoc18::day02::common_letters),
         _ => println!("Unknown command: {}", command),
     }
 }
