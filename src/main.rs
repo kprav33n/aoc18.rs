@@ -16,6 +16,7 @@ fn main() {
     match command {
         "day01a" => read_stdin_and_report_result(aoc18::day01::resulting_frequency),
         "day01b" => read_stdin_and_report_result(aoc18::day01::resulting_frequency_twice),
+        "day02a" => read_stdin_and_report_result(aoc18::day02::checksum),
         _ => println!("Unknown command: {}", command),
     }
 }
