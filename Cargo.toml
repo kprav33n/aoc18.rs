@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Praveen Kumar <praveen+git@kumar.in>"]
 
 [dependencies]
+chrono = "0.4"
 nom = "4"
