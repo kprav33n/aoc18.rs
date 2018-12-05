@@ -1,9 +1,9 @@
 extern crate chrono;
 
+use self::chrono::Timelike;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use self::chrono::Timelike;
 
 /// Compute the product of id of guard who sleeps the most and his most slept
 /// minute.
@@ -47,7 +47,9 @@ pub fn slacker_id_min(input: &str) -> u64 {
         match entry {
             Event::Begin(id, _) => {
                 current_id = id;
-                guards.entry(id).or_insert(Rc::new(RefCell::new(vec![0; 60])));
+                guards
+                    .entry(id)
+                    .or_insert(Rc::new(RefCell::new(vec![0; 60])));
             }
             Event::Sleep(t) => {
                 let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();
@@ -71,7 +73,13 @@ pub fn slacker_id_min(input: &str) -> u64 {
         if max_sleep < sum {
             max_sleep = sum;
             slacker = key;
-            minute = value.borrow().iter().enumerate().max_by_key(|&(_, item)| item).unwrap().0
+            minute = value
+                .borrow()
+                .iter()
+                .enumerate()
+                .max_by_key(|&(_, item)| item)
+                .unwrap()
+                .0
         }
     }
     minute as u64 * slacker
@@ -119,7 +127,9 @@ pub fn slacker_id_min2(input: &str) -> u64 {
         match entry {
             Event::Begin(id, _) => {
                 current_id = id;
-                guards.entry(id).or_insert(Rc::new(RefCell::new(vec![0; 60])));
+                guards
+                    .entry(id)
+                    .or_insert(Rc::new(RefCell::new(vec![0; 60])));
             }
             Event::Sleep(t) => {
                 let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();
@@ -140,7 +150,11 @@ pub fn slacker_id_min2(input: &str) -> u64 {
     let mut minute = 0;
     for (key, value) in guards {
         let guard = value.borrow();
-        let t = guard.iter().enumerate().max_by_key(|&(_, item)| item).unwrap();
+        let t = guard
+            .iter()
+            .enumerate()
+            .max_by_key(|&(_, item)| item)
+            .unwrap();
         if max_sleep < *t.1 {
             max_sleep = *t.1;
             slacker = key;
@@ -163,7 +177,7 @@ fn event_time(e: &Event) -> &DateTime {
     match e {
         Event::Begin(_, t) => t,
         Event::Sleep(t) => t,
-        Event::Wake(t) => t
+        Event::Wake(t) => t,
     }
 }
 
