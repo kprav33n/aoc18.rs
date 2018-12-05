@@ -34,6 +34,32 @@ pub fn num_remaining_units(input: &str) -> usize {
     chars.len() - num_burned
 }
 
+/// Find the smallest number of remaining units after reaction in the given
+/// sequence of units.
+///
+/// # Examples
+///
+/// ```
+/// use aoc18::day05::smallest_num_remaining_units;
+///
+/// assert_eq!(4, smallest_num_remaining_units("dabAcCaCBAcCcaDA"));
+/// ```
+pub fn smallest_num_remaining_units(input: &str) -> usize {
+    let mut min = std::usize::MAX;
+    for c in "abcdefghijklmnopqrstuvwxyz".chars() {
+        let n = num_remaining_units(
+            &input
+                .chars()
+                .filter(|x| !x.eq_ignore_ascii_case(&c))
+                .collect::<String>(),
+        );
+        if min > n {
+            min = n;
+        }
+    }
+    min
+}
+
 fn should_burn(x: char, y: char) -> bool {
     (x as i32 - y as i32).abs() == 32
 }
