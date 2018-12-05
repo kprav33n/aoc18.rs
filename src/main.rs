@@ -21,6 +21,7 @@ fn main() {
         "day03a" => read_stdin_and_report_result(aoc18::day03::overlapping_area),
         "day03b" => read_stdin_and_report_result(aoc18::day03::intact_claim),
         "day04a" => read_stdin_and_report_result(aoc18::day04::slacker_id_min),
+        "day04b" => read_stdin_and_report_result(aoc18::day04::slacker_id_min2),
         _ => println!("Unknown command: {}", command),
     }
 }

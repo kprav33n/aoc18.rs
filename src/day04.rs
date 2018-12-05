@@ -65,17 +65,89 @@ pub fn slacker_id_min(input: &str) -> u64 {
     }
     let mut slacker = 0;
     let mut max_sleep = 0;
-    let mut minute: u64 = 0;
+    let mut minute = 0;
     for (key, value) in guards {
         let sum: u64 = value.borrow().iter().sum();
         if max_sleep < sum {
             max_sleep = sum;
             slacker = key;
-            minute = (value.borrow().iter().enumerate().max_by_key(|&(_, item)| item).unwrap().0) as u64
+            minute = value.borrow().iter().enumerate().max_by_key(|&(_, item)| item).unwrap().0
         }
-
     }
-    minute * slacker
+    minute as u64 * slacker
+}
+
+/// Compute the product of id of guard who sleeps the most and his most slept
+/// minute.
+///
+/// # Examples
+///
+/// ```
+/// use aoc18::day04::slacker_id_min2;
+///
+/// assert_eq!(4455, slacker_id_min2("[1518-11-01 00:00] Guard #10 begins shift
+/// [1518-11-01 00:05] falls asleep
+/// [1518-11-01 00:25] wakes up
+/// [1518-11-01 00:30] falls asleep
+/// [1518-11-01 00:55] wakes up
+/// [1518-11-01 23:58] Guard #99 begins shift
+/// [1518-11-02 00:40] falls asleep
+/// [1518-11-02 00:50] wakes up
+/// [1518-11-03 00:05] Guard #10 begins shift
+/// [1518-11-03 00:24] falls asleep
+/// [1518-11-03 00:29] wakes up
+/// [1518-11-04 00:02] Guard #99 begins shift
+/// [1518-11-04 00:36] falls asleep
+/// [1518-11-04 00:46] wakes up
+/// [1518-11-05 00:03] Guard #99 begins shift
+/// [1518-11-05 00:45] falls asleep
+/// [1518-11-05 00:55] wakes up"));
+/// ```
+pub fn slacker_id_min2(input: &str) -> u64 {
+    let mut entries = input
+        .split("\n")
+        .filter(|s| !s.is_empty())
+        .map(|s| entry(s.trim()).unwrap())
+        .map(|(_, e)| e)
+        .collect::<Vec<Event>>();
+    entries.sort();
+    let mut current_id = 0;
+    // NOTE: RefCell<T> and the Interior Mutability Pattern
+    // https://doc.rust-lang.org/book/second-edition/ch15-05-interior-mutability.html
+    let mut guards: HashMap<u64, Rc<RefCell<Vec<u64>>>> = HashMap::new();
+    for entry in entries {
+        match entry {
+            Event::Begin(id, _) => {
+                current_id = id;
+                guards.entry(id).or_insert(Rc::new(RefCell::new(vec![0; 60])));
+            }
+            Event::Sleep(t) => {
+                let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();
+                for i in t.time().minute()..60 {
+                    guard[i as usize] += 1;
+                }
+            }
+            Event::Wake(t) => {
+                let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();
+                for i in t.time().minute()..60 {
+                    guard[i as usize] -= 1;
+                }
+            }
+        }
+    }
+    let mut slacker = 0;
+    let mut max_sleep = 0;
+    let mut minute = 0;
+    for (key, value) in guards {
+        let guard = value.borrow();
+        let t = guard.iter().enumerate().max_by_key(|&(_, item)| item).unwrap();
+        if max_sleep < *t.1 {
+            max_sleep = *t.1;
+            slacker = key;
+            minute = t.0;
+        }
+    }
+    minute as u64 * slacker
 }
 
 type DateTime = chrono::NaiveDateTime;
