@@ -24,6 +24,7 @@ fn main() {
         "day04b" => read_stdin_and_report_result(aoc18::day04::slacker_id_min2),
         "day05a" => read_stdin_and_report_result(aoc18::day05::num_remaining_units),
         "day05b" => read_stdin_and_report_result(aoc18::day05::smallest_num_remaining_units),
+        "day06a" => read_stdin_and_report_result(aoc18::day06::largest_area),
         _ => println!("Unknown command: {}", command),
     }
 }
