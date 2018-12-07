@@ -65,6 +65,55 @@ pub fn largest_area(input: &str) -> usize {
         .fold(0, |max, (_, &v)| if max < v { v } else { max })
 }
 
+/// Find the size of the largest finite area based on given list of coordinates.
+///
+/// # Examples
+///
+/// ```
+/// use aoc18::day06::safe_area;
+///
+/// assert_eq!(16, safe_area("1, 1
+/// 1, 6
+/// 8, 3
+/// 3, 4
+/// 5, 5
+/// 8, 9", 32));
+/// ```
+pub fn safe_area(input: &str, limit: i64) -> usize {
+    let coordinates = input
+        .split("\n")
+        .filter(|s| !s.is_empty())
+        .map(|s| Point::from_str(s).unwrap())
+        .collect::<Vec<Point>>();
+
+    const BOUND: usize = 500;
+    let mut plane = [[0; BOUND]; BOUND];
+    for i in 0..BOUND {
+        for j in 0..BOUND {
+            let mut sum = 0;
+            for c in coordinates.iter() {
+                let d = c.manhattan_distance(&Point {
+                    x: i as i64,
+                    y: j as i64,
+                });
+                sum += d;
+            }
+            plane[j][i] = sum;
+        }
+    }
+
+
+    let mut result = 0;
+    for i in 0..BOUND {
+        for j in 0..BOUND {
+            if plane[i][j] < limit {
+                result += 1;
+            }
+        }
+    }
+    result
+}
+
 #[derive(Debug, PartialEq)]
 struct Point {
     x: i64,
