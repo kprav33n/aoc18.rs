@@ -102,7 +102,6 @@ pub fn safe_area(input: &str, limit: i64) -> usize {
         }
     }
 
-
     let mut result = 0;
     for i in 0..BOUND {
         for j in 0..BOUND {

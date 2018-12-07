@@ -6,3 +6,5 @@ authors = ["Praveen Kumar <praveen+git@kumar.in>"]
 [dependencies]
 chrono = "0.4"
 nom = "4"
+petgraph = "0.4"
+regex = "1"
