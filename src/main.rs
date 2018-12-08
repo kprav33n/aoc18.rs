@@ -27,6 +27,7 @@ fn main() {
         "day06a" => read_stdin_and_report_result(aoc18::day06::largest_area),
         "day06b" => read_stdin_and_report_result(|x| aoc18::day06::safe_area(x, 10000)),
         "day07a" => read_stdin_and_report_result(aoc18::day07::steps),
+        "day07b" => read_stdin_and_report_result(|x| aoc18::day07::completion_time(x, 5, 60)),
         _ => println!("Unknown command: {}", command),
     }
 }
