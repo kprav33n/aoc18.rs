@@ -120,29 +120,26 @@ pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
                 let _ = tx.send(n);
             }
 
-            _ => {
-                match rx.try_recv() {
-                    Ok((n, t)) => {
-                        ticks = t;
-                        l.push(n);
-                        let mut removals = Vec::new();
-                        for m in deps.neighbors_directed(n, petgraph::Outgoing) {
-                            removals.push((n, m));
-                        }
-
-                        'removal: for r in removals {
-                            deps.remove_edge(r.0, r.1);
-                            for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
-                                continue 'removal;
-                            }
-                            s.insert(r.1);
-                        }
+            _ => match rx.try_recv() {
+                Ok((n, t)) => {
+                    ticks = t;
+                    l.push(n);
+                    let mut removals = Vec::new();
+                    for m in deps.neighbors_directed(n, petgraph::Outgoing) {
+                        removals.push((n, m));
                     }
 
-                    _ => {
+                    'removal: for r in removals {
+                        deps.remove_edge(r.0, r.1);
+                        for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
+                            continue 'removal;
+                        }
+                        s.insert(r.1);
                     }
                 }
-            }
+
+                _ => {}
+            },
         }
     }
 
