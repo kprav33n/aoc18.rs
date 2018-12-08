@@ -52,11 +52,7 @@ struct Node {
 
 impl Node {
     fn meta_sum(&self) -> usize {
-        let mut sum: usize = self.metadata.iter().sum();
-        for child in self.children.iter() {
-            sum += child.meta_sum();
-        }
-        sum
+        self.children.iter().fold(self.metadata.iter().sum(), |acc, c| acc + c.meta_sum())
     }
 
     fn value(&self) -> usize {
