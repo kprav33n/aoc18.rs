@@ -21,6 +21,29 @@ pub fn meta_sum(input: &str) -> usize {
     }
 }
 
+/// Find the value of the root node.
+///
+/// # Examples
+///
+/// ```
+/// use aoc18::day08::root_value;
+///
+/// assert_eq!(66, root_value("2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2 "));
+/// ```
+pub fn root_value(input: &str) -> usize {
+    // NOTE: Passing the exact string results in parser error
+    // `Err(Incomplete(Size(1)))`. So, pad-right the test input by a space, and
+    // pad-right the puzzle input by a `\n`.
+    match node(input) {
+        Ok((_, n)) => n.value(),
+
+        x => {
+            println!("{:?}", x);
+            0
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 struct Node {
     children: Vec<Node>,
@@ -34,6 +57,20 @@ impl Node {
             sum += child.meta_sum();
         }
         sum
+    }
+
+    fn value(&self) -> usize {
+        if self.children.len() == 0 {
+            self.metadata.iter().sum()
+        } else {
+            self.metadata.iter().fold(0, |acc, i| {
+                if *i == 0 || *i > self.children.len() {
+                    acc
+                } else {
+                    acc + self.children[i - 1].value()
+                }
+            })
+        }
     }
 }
 
@@ -62,18 +99,3 @@ named!(
             (Node{children, metadata})
     )
 );
-
-// #[test]
-// fn test_node() {
-//     // assert_eq!(node("0 0"), Ok(("", Node{children: vec![], metadata: vec![]})));
-//     assert_eq!(
-//         node("2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2 "),
-//         Ok((
-//             "",
-//             Node {
-//                 children: vec![],
-//                 metadata: vec![3]
-//             }
-//         ))
-//     );
-// }

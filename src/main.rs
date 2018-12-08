@@ -29,6 +29,7 @@ fn main() {
         "day07a" => read_stdin_and_report_result(aoc18::day07::steps),
         "day07b" => read_stdin_and_report_result(|x| aoc18::day07::completion_time(x, 5, 60)),
         "day08a" => read_stdin_and_report_result(aoc18::day08::meta_sum),
+        "day08b" => read_stdin_and_report_result(aoc18::day08::root_value),
         _ => println!("Unknown command: {}", command),
     }
 }
