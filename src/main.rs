@@ -31,6 +31,7 @@ fn main() {
         "day08a" => read_stdin_and_report_result(aoc18::day08::meta_sum),
         "day08b" => read_stdin_and_report_result(aoc18::day08::root_value),
         "day09a" => read_stdin_and_report_result(aoc18::day09::winning_score),
+        "day09b" => read_stdin_and_report_result(aoc18::day09::winning_score2),
         _ => println!("Unknown command: {}", command),
     }
 }
