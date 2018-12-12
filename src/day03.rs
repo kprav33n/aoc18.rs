@@ -20,11 +20,13 @@ pub fn overlapping_area(input: &str) -> u64 {
         }
         l.push(' ');
         match claim(l.as_str()) {
-            Ok((_, c)) => for i in c.left_offset..c.left_offset + c.width {
-                for j in c.top_offset..c.top_offset + c.height {
-                    fabric[j][i] += 1;
+            Ok((_, c)) => {
+                for i in c.left_offset..c.left_offset + c.width {
+                    for j in c.top_offset..c.top_offset + c.height {
+                        fabric[j][i] += 1;
+                    }
                 }
-            },
+            }
             Err(e) => println!("error while parsing {}: {}", l, e),
         }
     }

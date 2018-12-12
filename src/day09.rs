@@ -1,8 +1,8 @@
 extern crate regex;
 
 use self::regex::{Error, Regex};
-use std::str::FromStr;
 use std::collections::VecDeque;
+use std::str::FromStr;
 
 /// Find the winning Elf's score.
 ///
@@ -21,7 +21,9 @@ use std::collections::VecDeque;
 pub fn winning_score(input: &str) -> usize {
     let mut g = Game::from_str(input.trim()).unwrap();
     g.play();
-    g.scores.iter().fold(0, |max, x| if max < *x {*x} else {max})
+    g.scores
+        .iter()
+        .fold(0, |max, x| if max < *x { *x } else { max })
 }
 
 /// Find the winning Elf's score.
@@ -37,7 +39,9 @@ pub fn winning_score2(input: &str) -> usize {
     let mut g = Game::from_str(input.trim()).unwrap();
     g.last_marble *= 100;
     g.play();
-    g.scores.iter().fold(0, |max, x| if max < *x {*x} else {max})
+    g.scores
+        .iter()
+        .fold(0, |max, x| if max < *x { *x } else { max })
 }
 
 #[derive(Debug)]
@@ -95,12 +99,14 @@ impl Game {
 
 #[derive(Debug)]
 struct Ring {
-    buffer: VecDeque<usize>
+    buffer: VecDeque<usize>,
 }
 
 impl Ring {
     fn new() -> Self {
-        let mut r = Ring{buffer: VecDeque::new()};
+        let mut r = Ring {
+            buffer: VecDeque::new(),
+        };
         r.buffer.push_back(0);
         r
     }
