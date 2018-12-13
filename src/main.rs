@@ -32,6 +32,7 @@ fn main() {
         "day08b" => read_stdin_and_report_result(aoc18::day08::root_value),
         "day09a" => read_stdin_and_report_result(aoc18::day09::winning_score),
         "day09b" => read_stdin_and_report_result(aoc18::day09::winning_score2),
+        "day11a" => read_stdin_and_report_result(aoc18::day11::largest_powered_cell),
         _ => println!("Unknown command: {}", command),
     }
 }
