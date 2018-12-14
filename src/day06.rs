@@ -18,7 +18,7 @@ use std::str::FromStr;
 /// ```
 pub fn largest_area(input: &str) -> usize {
     let coordinates = input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| Point::from_str(s).unwrap())
         .collect::<Vec<Point>>();
@@ -81,7 +81,7 @@ pub fn largest_area(input: &str) -> usize {
 /// ```
 pub fn safe_area(input: &str, limit: i64) -> usize {
     let coordinates = input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| Point::from_str(s).unwrap())
         .collect::<Vec<Point>>();

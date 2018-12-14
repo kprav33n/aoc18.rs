@@ -16,11 +16,11 @@ use std::collections::HashSet;
 /// ```
 pub fn resulting_frequency(input: &str) -> i64 {
     input
-        .split("\n")
+        .split('\n')
         .map(|s| s.trim())
         .filter(|s| !s.is_empty())
-        .map(|s| s.parse().unwrap())
-        .fold(0, |acc, x: i64| acc + x)
+        .map(|s| s.parse::<i64>().unwrap())
+        .sum()
 }
 
 /// Compute the frequency that's reached twice from a list of deltas seperated
@@ -39,7 +39,7 @@ pub fn resulting_frequency(input: &str) -> i64 {
 pub fn resulting_frequency_twice(input: &str) -> i64 {
     let mut frequencies = HashSet::new();
     let deltas: Vec<i64> = input
-        .split("\n")
+        .split('\n')
         .map(|s| s.trim())
         .filter(|s| !s.is_empty())
         .map(|s| s.parse().unwrap())

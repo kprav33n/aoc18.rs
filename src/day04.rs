@@ -33,7 +33,7 @@ use std::rc::Rc;
 /// ```
 pub fn slacker_id_min(input: &str) -> u64 {
     let mut entries = input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| entry(s.trim()).unwrap())
         .map(|(_, e)| e)
@@ -49,7 +49,7 @@ pub fn slacker_id_min(input: &str) -> u64 {
                 current_id = id;
                 guards
                     .entry(id)
-                    .or_insert(Rc::new(RefCell::new(vec![0; 60])));
+                    .or_insert_with(|| Rc::new(RefCell::new(vec![0; 60])));
             }
             Event::Sleep(t) => {
                 let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();
@@ -113,7 +113,7 @@ pub fn slacker_id_min(input: &str) -> u64 {
 /// ```
 pub fn slacker_id_min2(input: &str) -> u64 {
     let mut entries = input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| entry(s.trim()).unwrap())
         .map(|(_, e)| e)
@@ -129,7 +129,7 @@ pub fn slacker_id_min2(input: &str) -> u64 {
                 current_id = id;
                 guards
                     .entry(id)
-                    .or_insert(Rc::new(RefCell::new(vec![0; 60])));
+                    .or_insert_with(|| Rc::new(RefCell::new(vec![0; 60])));
             }
             Event::Sleep(t) => {
                 let mut guard = guards.get_mut(&current_id).unwrap().borrow_mut();

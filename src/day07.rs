@@ -28,7 +28,7 @@ use std::{thread, time};
 pub fn steps(input: &str) -> String {
     let mut deps = DiGraphMap::new();
     input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| OrderingEntry::from_str(s).unwrap())
         .for_each(|e| {
@@ -90,7 +90,7 @@ pub fn steps(input: &str) -> String {
 pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
     let mut deps = DiGraphMap::new();
     input
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| OrderingEntry::from_str(s).unwrap())
         .for_each(|e| {
@@ -120,26 +120,22 @@ pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
                 let _ = tx.send(n);
             }
 
-            _ => match rx.try_recv() {
-                Ok((n, t)) => {
-                    ticks = t;
-                    l.push(n);
-                    let mut removals = Vec::new();
-                    for m in deps.neighbors_directed(n, petgraph::Outgoing) {
-                        removals.push((n, m));
-                    }
-
-                    'removal: for r in removals {
-                        deps.remove_edge(r.0, r.1);
-                        for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
-                            continue 'removal;
-                        }
-                        s.insert(r.1);
-                    }
+            _ => if let Ok((n,t)) = rx.try_recv() {
+                ticks = t;
+                l.push(n);
+                let mut removals = Vec::new();
+                for m in deps.neighbors_directed(n, petgraph::Outgoing) {
+                    removals.push((n, m));
                 }
 
-                _ => {}
-            },
+                'removal: for r in removals {
+                    deps.remove_edge(r.0, r.1);
+                    for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
+                        continue 'removal;
+                    }
+                    s.insert(r.1);
+                }
+            }
         }
     }
 
@@ -181,7 +177,7 @@ impl Crew {
         let (tx_in, rx_in) = mpsc::channel();
         let (tx_out, rx_out) = mpsc::channel();
         let mut crew = Crew {
-            factor: factor,
+            factor,
             workers: vec![('U', 0); size],
             idle: (0..size).rev().collect(),
             backlog: vec![],
@@ -215,11 +211,8 @@ impl Crew {
             match self.workers[i] {
                 (_, 0) => {
                     // Waiting idle.
-                    match self.backlog.pop() {
-                        Some(c) => {
-                            self.assign_item(i, c);
-                        }
-                        _ => {}
+                    if let Some(c) = self.backlog.pop() {
+                        self.assign_item(i, c);
                     }
                 }
 

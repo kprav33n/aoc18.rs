@@ -10,7 +10,7 @@
 pub fn overlapping_area(input: &str) -> u64 {
     const BOUND: usize = 1000;
     let mut fabric = [[0u8; BOUND]; BOUND];
-    for line in input.split("\n") {
+    for line in input.split('\n') {
         // NOTE: Parsing the exact input line has a gotcha while using nom 4.
         // Hence, append a space at the end of the line to make parser happy.
         // https://github.com/Geal/nom/issues/764
@@ -22,8 +22,8 @@ pub fn overlapping_area(input: &str) -> u64 {
         match claim(l.as_str()) {
             Ok((_, c)) => {
                 for i in c.left_offset..c.left_offset + c.width {
-                    for j in c.top_offset..c.top_offset + c.height {
-                        fabric[j][i] += 1;
+                    for f in fabric.iter_mut().skip(c.top_offset).take(c.height) {
+                        f[i] += 1;
                     }
                 }
             }
@@ -32,8 +32,8 @@ pub fn overlapping_area(input: &str) -> u64 {
     }
     let mut result = 0;
     for i in 0..BOUND {
-        for j in 0..BOUND {
-            if fabric[j][i] > 1 {
+        for f in fabric.iter().take(BOUND) {
+            if f[i] > 1 {
                 result += 1;
             }
         }
@@ -54,7 +54,7 @@ pub fn intact_claim(input: &str) -> usize {
     const BOUND: usize = 1000;
     let mut fabric = [[0u8; BOUND]; BOUND];
     let mut claims = Vec::new();
-    for line in input.split("\n") {
+    for line in input.split('\n') {
         // NOTE: Parsing the exact input line has a gotcha while using nom 4.
         // Hence, append a space at the end of the line to make parser happy.
         // https://github.com/Geal/nom/issues/764
@@ -66,8 +66,8 @@ pub fn intact_claim(input: &str) -> usize {
         match claim(l.as_str()) {
             Ok((_, c)) => {
                 for i in c.left_offset..c.left_offset + c.width {
-                    for j in c.top_offset..c.top_offset + c.height {
-                        fabric[j][i] += 1;
+                    for f in fabric.iter_mut().skip(c.top_offset).take(c.height) {
+                        f[i] += 1;
                     }
                 }
                 claims.push(c);
@@ -78,15 +78,15 @@ pub fn intact_claim(input: &str) -> usize {
 
     'outer: for c in claims {
         for i in c.left_offset..c.left_offset + c.width {
-            for j in c.top_offset..c.top_offset + c.height {
-                if fabric[j][i] > 1 {
+            for f in fabric.iter().skip(c.top_offset).take(c.height) {
+                if f[i] > 1 {
                     continue 'outer;
                 }
             }
         }
         return c.id;
     }
-    return 0;
+    0
 }
 
 #[derive(Debug, PartialEq)]

@@ -58,7 +58,7 @@ impl Node {
     }
 
     fn value(&self) -> usize {
-        if self.children.len() == 0 {
+        if self.children.is_empty() {
             self.metadata.iter().sum()
         } else {
             self.metadata.iter().fold(0, |acc, i| {

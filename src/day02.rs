@@ -10,7 +10,7 @@ use std::collections::HashMap;
 /// assert_eq!(12, checksum("abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab"));
 /// ```
 pub fn checksum(input: &str) -> u64 {
-    let lines: Vec<&str> = input.split("\n").map(|s| s.trim()).collect();
+    let lines: Vec<&str> = input.split('\n').map(|s| s.trim()).collect();
     let mut twos = 0;
     let mut threes = 0;
     for line in lines {
@@ -44,7 +44,7 @@ pub fn checksum(input: &str) -> u64 {
 /// assert_eq!("fgij", common_letters("abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz"));
 /// ```
 pub fn common_letters(input: &str) -> String {
-    let lines: Vec<&str> = input.split("\n").map(|s| s.trim()).collect();
+    let lines: Vec<&str> = input.split('\n').map(|s| s.trim()).collect();
 
     for i in 0..(lines.len() - 1) {
         for j in (i + 1)..lines.len() {
