@@ -1,8 +1,5 @@
-extern crate petgraph;
-extern crate regex;
-
-use self::petgraph::graphmap::DiGraphMap;
-use self::regex::{Error, Regex};
+use petgraph::graphmap::DiGraphMap;
+use regex::{Error, Regex};
 use std::collections::BTreeSet;
 use std::str::FromStr;
 use std::sync::mpsc;
@@ -120,20 +117,22 @@ pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
                 let _ = tx.send(n);
             }
 
-            _ => if let Ok((n,t)) = rx.try_recv() {
-                ticks = t;
-                l.push(n);
-                let mut removals = Vec::new();
-                for m in deps.neighbors_directed(n, petgraph::Outgoing) {
-                    removals.push((n, m));
-                }
-
-                'removal: for r in removals {
-                    deps.remove_edge(r.0, r.1);
-                    for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
-                        continue 'removal;
+            _ => {
+                if let Ok((n, t)) = rx.try_recv() {
+                    ticks = t;
+                    l.push(n);
+                    let mut removals = Vec::new();
+                    for m in deps.neighbors_directed(n, petgraph::Outgoing) {
+                        removals.push((n, m));
                     }
-                    s.insert(r.1);
+
+                    'removal: for r in removals {
+                        deps.remove_edge(r.0, r.1);
+                        for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
+                            continue 'removal;
+                        }
+                        s.insert(r.1);
+                    }
                 }
             }
         }

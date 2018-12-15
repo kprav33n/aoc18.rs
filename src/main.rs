@@ -1,5 +1,4 @@
-extern crate aoc18;
-
+use aoc18;
 use std::env;
 use std::io::{self, Read};
 

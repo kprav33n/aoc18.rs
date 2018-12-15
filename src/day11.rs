@@ -28,9 +28,9 @@ pub fn largest_powered_cell(serial: &str) -> Point {
     }
 
     let mut max_power_level = 0;
-    let mut max_point = Point{x: 0, y: 0};
-    for x in 0..SIZE-3 {
-        for y in 0..SIZE-3 {
+    let mut max_point = Point { x: 0, y: 0 };
+    for x in 0..SIZE - 3 {
+        for y in 0..SIZE - 3 {
             let mut grid_power = 0;
             for i in 0..3 {
                 for j in 0..3 {
@@ -39,7 +39,7 @@ pub fn largest_powered_cell(serial: &str) -> Point {
             }
             if max_power_level < grid_power {
                 max_power_level = grid_power;
-                max_point = Point{x: x + 1, y: y + 1};
+                max_point = Point { x: x + 1, y: y + 1 };
             }
         }
     }

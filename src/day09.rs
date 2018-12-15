@@ -1,6 +1,4 @@
-extern crate regex;
-
-use self::regex::{Error, Regex};
+use regex::{Error, Regex};
 use std::collections::VecDeque;
 use std::str::FromStr;
 
