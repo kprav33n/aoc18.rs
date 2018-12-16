@@ -49,6 +49,10 @@ fn main() {
             Err(e) => println!("error: {}", e),
         },
         "day11a" => read_stdin_and_report_result(aoc18::day11::largest_powered_cell),
+        "day11b" => match read_stdin_and_return_result(aoc18::day11::largest_powered_cell2) {
+            Ok((p, s)) => println!("{},{},{}", p.x, p.y, s),
+            Err(e) => println!("error: {}", e),
+        },
         _ => println!("Unknown command: {}", command),
     }
 }
