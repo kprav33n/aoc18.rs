@@ -1,12 +1,21 @@
 use aoc18;
 use std::env;
 use std::io::{self, Read};
+use std::result::Result;
 
 fn read_stdin_and_report_result<T: std::fmt::Display>(f: fn(&str) -> T) {
     let mut buffer = String::new();
     match io::stdin().read_to_string(&mut buffer) {
         Ok(_) => println!("{}", f(&buffer)),
-        Err(e) => println!("Failed to read from STDIN: {}", e),
+        Err(e) => println!("failed to read from STDIN: {}", e),
+    }
+}
+
+fn read_stdin_and_return_result<T>(f: fn(&str) -> T) -> Result<T, String> {
+    let mut buffer = String::new();
+    match io::stdin().read_to_string(&mut buffer) {
+        Ok(_) => Ok(f(&buffer)),
+        Err(e) => Err(format!("Failed to read from STDIN: {}", e)),
     }
 }
 
@@ -31,6 +40,14 @@ fn main() {
         "day08b" => read_stdin_and_report_result(aoc18::day08::root_value),
         "day09a" => read_stdin_and_report_result(aoc18::day09::winning_score),
         "day09b" => read_stdin_and_report_result(aoc18::day09::winning_score2),
+        "day10a" => match read_stdin_and_return_result(aoc18::day10::message) {
+            Ok((s, _)) => println!("{}", s),
+            Err(e) => println!("error: {}", e),
+        },
+        "day10b" => match read_stdin_and_return_result(aoc18::day10::message) {
+            Ok((_, n)) => println!("{}", n),
+            Err(e) => println!("error: {}", e),
+        },
         "day11a" => read_stdin_and_report_result(aoc18::day11::largest_powered_cell),
         _ => println!("Unknown command: {}", command),
     }
