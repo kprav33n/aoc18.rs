@@ -58,7 +58,7 @@ pub fn message(input: &str) -> (String, usize) {
     let mut last_min_y = 0;
     let mut last_max_x = 0;
     let mut last_max_y = 0;
-    for i in 0..100000 {
+    for i in 0..100_000 {
         entries = entries.iter().map(Entry::next).collect();
         let (min_x, min_y, max_x, max_y) = entries_bounds(&entries);
         let width = max_x - min_x;
