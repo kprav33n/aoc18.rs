@@ -44,7 +44,7 @@ use std::str::FromStr;
 pub fn message(input: &str) -> (String, usize) {
     let mut entries = input
         .trim()
-        .split("\n")
+        .split('\n')
         .map(Entry::from_str)
         .map(Result::unwrap)
         .collect::<Vec<Entry>>();
@@ -87,7 +87,7 @@ pub fn message(input: &str) -> (String, usize) {
     (String::from(""), 0)
 }
 
-fn entries_bounds(entries: &Vec<Entry>) -> (i64, i64, i64, i64) {
+fn entries_bounds(entries: &[Entry]) -> (i64, i64, i64, i64) {
     let mut min_x = std::i64::MAX;
     let mut max_x = std::i64::MIN;
     let mut min_y = std::i64::MAX;
@@ -101,7 +101,7 @@ fn entries_bounds(entries: &Vec<Entry>) -> (i64, i64, i64, i64) {
     (min_x, min_y, max_x, max_y)
 }
 
-fn plot_entries(entries: &Vec<Entry>, min_x: i64, min_y: i64, max_x: i64, max_y: i64) -> String {
+fn plot_entries(entries: &[Entry], min_x: i64, min_y: i64, max_x: i64, max_y: i64) -> String {
     let mut bitmap: Vec<Vec<char>> = (min_y..=max_y)
         .map(|_| (min_x..=max_x).map(|_| '.').collect())
         .collect();
@@ -112,7 +112,6 @@ fn plot_entries(entries: &Vec<Entry>, min_x: i64, min_y: i64, max_x: i64, max_y:
     bitmap
         .iter()
         .map(|v| v.into_iter().collect::<String>() + "\n")
-        .into_iter()
         .collect()
 }
 
