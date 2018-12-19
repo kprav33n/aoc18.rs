@@ -53,6 +53,7 @@ fn main() {
             Ok((p, s)) => println!("{},{},{}", p.x, p.y, s),
             Err(e) => println!("error: {}", e),
         },
+        "day16a" => read_stdin_and_report_result(aoc18::day16::num_samples),
         _ => println!("Unknown command: {}", command),
     }
 }
