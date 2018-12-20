@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::str::FromStr;
 
 /// Find the number of samples that behave like three or more opcodes.
@@ -30,6 +33,118 @@ pub fn num_samples(input: &str) -> usize {
         .count()
 }
 
+/// Find the register 0 in the result after executing the test program.
+pub fn result_r0(input: &str) -> i64 {
+    let parts: Vec<&str> = input.split("\n\n\n\n").collect();
+    let samples = parts[0];
+    let program = parts[1];
+    // Populate a list of set of possible instructions for every OP code.
+    let mut op_table: HashMap<i64, Rc<RefCell<Vec<HashSet<Operation>>>>> = HashMap::new();
+    for sample in samples
+        .split("\n\n")
+        .filter(|s| !s.trim().is_empty())
+        .map(parse_sample)
+    {
+        let (before, op, after) = sample;
+        let mut set = HashSet::new();
+        for i in op.enumerate_all() {
+            if before.execute(&i) == after {
+                set.insert(i.op);
+            }
+        }
+        if let Operation::OP(o) = op.op {
+            op_table
+                .entry(o)
+                .or_insert_with(|| Rc::new(RefCell::new(vec![])))
+                .borrow_mut()
+                .push(set);
+        }
+    }
+
+    let mut known = vec![Operation::OP(-1); 16];
+    let mut unprocessed = vec![HashSet::new(); 16];
+
+    // First find the most certain instructions for a given OP code.
+    for (o, l) in op_table.iter() {
+        let all_ops: HashSet<Operation> = [
+            Operation::ADDR,
+            Operation::ADDI,
+            Operation::MULR,
+            Operation::MULI,
+            Operation::BANR,
+            Operation::BANI,
+            Operation::BORR,
+            Operation::BORI,
+            Operation::SETR,
+            Operation::SETI,
+            Operation::GTIR,
+            Operation::GTRI,
+            Operation::GTRR,
+            Operation::EQIR,
+            Operation::EQRI,
+            Operation::EQRR,
+        ]
+        .iter()
+        .cloned()
+        .collect();
+        let reduced: HashSet<_> = l
+            .borrow()
+            .iter()
+            .fold(all_ops, |acc, x| acc.intersection(&x).cloned().collect());
+        if reduced.len() == 1 {
+            known[*o as usize] = reduced.iter().next().unwrap().clone();
+        } else {
+            unprocessed[*o as usize] = reduced;
+        }
+    }
+
+    loop {
+        // Eliminate redundant choices based on known choices.
+        let mut should_break = true;
+        for j in 0..16 {
+            let c = known[j].clone();
+            if c == Operation::OP(-1) {
+                continue;
+            }
+            for (i, u) in unprocessed.iter_mut().enumerate() {
+                u.remove(&c);
+                if u.len() > 1 {
+                    should_break = false;
+                } else if u.len() == 1 {
+                    known[i] = u.iter().next().unwrap().clone();
+                }
+            }
+        }
+        if should_break {
+            break;
+        }
+    }
+
+    program
+        .split('\n')
+        .filter(|s| !s.trim().is_empty())
+        .fold(
+            Device {
+                registers: [0, 0, 0, 0],
+            },
+            |acc, s| {
+                let i = Instruction::from_str(s).unwrap();
+                if let Operation::OP(o) = i.op {
+                    let ni = Instruction {
+                        op: known[o as usize].clone(),
+                        a: i.a,
+                        b: i.b,
+                        c: i.c,
+                    };
+                    acc.execute(&ni)
+                } else {
+                    acc
+                }
+            },
+        )
+        .registers[0]
+}
+
 fn parse_sample(input: &str) -> (Device, Instruction, Device) {
     let parts: Vec<&str> = input.trim().split('\n').collect();
     (
@@ -39,26 +154,34 @@ fn parse_sample(input: &str) -> (Device, Instruction, Device) {
     )
 }
 
-#[derive(Debug)]
-enum Instruction {
-    ADDR(i64, i64, i64),
-    ADDI(i64, i64, i64),
-    MULR(i64, i64, i64),
-    MULI(i64, i64, i64),
-    BANR(i64, i64, i64),
-    BANI(i64, i64, i64),
-    BORR(i64, i64, i64),
-    BORI(i64, i64, i64),
-    SETR(i64, i64, i64),
-    SETI(i64, i64, i64),
-    GTIR(i64, i64, i64),
-    GTRI(i64, i64, i64),
-    GTRR(i64, i64, i64),
-    EQIR(i64, i64, i64),
-    EQRI(i64, i64, i64),
-    EQRR(i64, i64, i64),
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+enum Operation {
+    ADDR,
+    ADDI,
+    MULR,
+    MULI,
+    BANR,
+    BANI,
+    BORR,
+    BORI,
+    SETR,
+    SETI,
+    GTIR,
+    GTRI,
+    GTRR,
+    EQIR,
+    EQRI,
+    EQRR,
 
-    OP(i64, i64, i64, i64),
+    OP(i64),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct Instruction {
+    op: Operation,
+    a: i64,
+    b: i64,
+    c: i64,
 }
 
 impl FromStr for Instruction {
@@ -70,30 +193,115 @@ impl FromStr for Instruction {
             .split(' ')
             .map(|s| s.trim().parse().unwrap())
             .collect();
-        Ok(Instruction::OP(r[0], r[1], r[2], r[3]))
+        Ok(Instruction {
+            op: Operation::OP(r[0]),
+            a: r[1],
+            b: r[2],
+            c: r[3],
+        })
     }
 }
 
 impl Instruction {
     fn enumerate_all(&self) -> Vec<Self> {
-        if let Instruction::OP(_, a, b, c) = &self {
+        if let Operation::OP(_) = &self.op {
             return vec![
-                Instruction::ADDR(*a, *b, *c),
-                Instruction::ADDI(*a, *b, *c),
-                Instruction::MULR(*a, *b, *c),
-                Instruction::MULI(*a, *b, *c),
-                Instruction::BANR(*a, *b, *c),
-                Instruction::BANI(*a, *b, *c),
-                Instruction::BORR(*a, *b, *c),
-                Instruction::BORI(*a, *b, *c),
-                Instruction::SETR(*a, *b, *c),
-                Instruction::SETI(*a, *b, *c),
-                Instruction::GTIR(*a, *b, *c),
-                Instruction::GTRI(*a, *b, *c),
-                Instruction::GTRR(*a, *b, *c),
-                Instruction::EQIR(*a, *b, *c),
-                Instruction::EQRI(*a, *b, *c),
-                Instruction::EQRR(*a, *b, *c),
+                Instruction {
+                    op: Operation::ADDR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::ADDI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::MULR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::MULI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::BANR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::BANI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::BORR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::BORI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::SETR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::SETI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::GTIR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::GTRI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::GTRR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::EQIR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::EQRI,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
+                Instruction {
+                    op: Operation::EQRR,
+                    a: self.a,
+                    b: self.b,
+                    c: self.c,
+                },
             ];
         }
         panic!("not a generic instruction")
@@ -123,84 +331,82 @@ impl FromStr for Device {
 impl Device {
     fn execute(&self, i: &Instruction) -> Self {
         let mut result = self.clone();
-        match i {
-            Instruction::ADDR(a, b, c) => {
-                result.registers[*c as usize] =
-                    result.registers[*a as usize] + result.registers[*b as usize]
+        match i.op.clone() {
+            Operation::ADDR => {
+                result.registers[i.c as usize] =
+                    result.registers[i.a as usize] + result.registers[i.b as usize]
             }
-            Instruction::ADDI(a, b, c) => {
-                result.registers[*c as usize] = result.registers[*a as usize] + *b
+            Operation::ADDI => {
+                result.registers[i.c as usize] = result.registers[i.a as usize] + i.b
             }
-            Instruction::MULR(a, b, c) => {
-                result.registers[*c as usize] =
-                    result.registers[*a as usize] * result.registers[*b as usize]
+            Operation::MULR => {
+                result.registers[i.c as usize] =
+                    result.registers[i.a as usize] * result.registers[i.b as usize]
             }
-            Instruction::MULI(a, b, c) => {
-                result.registers[*c as usize] = result.registers[*a as usize] * *b
+            Operation::MULI => {
+                result.registers[i.c as usize] = result.registers[i.a as usize] * i.b
             }
-            Instruction::BANR(a, b, c) => {
-                result.registers[*c as usize] =
-                    result.registers[*a as usize] & result.registers[*b as usize]
+            Operation::BANR => {
+                result.registers[i.c as usize] =
+                    result.registers[i.a as usize] & result.registers[i.b as usize]
             }
-            Instruction::BANI(a, b, c) => {
-                result.registers[*c as usize] = result.registers[*a as usize] & *b
+            Operation::BANI => {
+                result.registers[i.c as usize] = result.registers[i.a as usize] & i.b
             }
-            Instruction::BORR(a, b, c) => {
-                result.registers[*c as usize] =
-                    result.registers[*a as usize] | result.registers[*b as usize]
+            Operation::BORR => {
+                result.registers[i.c as usize] =
+                    result.registers[i.a as usize] | result.registers[i.b as usize]
             }
-            Instruction::BORI(a, b, c) => {
-                result.registers[*c as usize] = result.registers[*a as usize] | *b
+            Operation::BORI => {
+                result.registers[i.c as usize] = result.registers[i.a as usize] | i.b
             }
-            Instruction::SETR(a, _, c) => {
-                result.registers[*c as usize] = result.registers[*a as usize]
-            }
-            Instruction::SETI(a, _, c) => result.registers[*c as usize] = *a,
-            Instruction::GTIR(a, b, c) => {
-                result.registers[*c as usize] = if *a > result.registers[*b as usize] {
+            Operation::SETR => result.registers[i.c as usize] = result.registers[i.a as usize],
+            Operation::SETI => result.registers[i.c as usize] = i.a,
+            Operation::GTIR => {
+                result.registers[i.c as usize] = if i.a > result.registers[i.b as usize] {
                     1
                 } else {
                     0
                 }
             }
-            Instruction::GTRI(a, b, c) => {
-                result.registers[*c as usize] = if result.registers[*a as usize] > *b {
+            Operation::GTRI => {
+                result.registers[i.c as usize] = if result.registers[i.a as usize] > i.b {
                     1
                 } else {
                     0
                 }
             }
-            Instruction::GTRR(a, b, c) => {
-                result.registers[*c as usize] =
-                    if result.registers[*a as usize] > result.registers[*b as usize] {
+            Operation::GTRR => {
+                result.registers[i.c as usize] =
+                    if result.registers[i.a as usize] > result.registers[i.b as usize] {
                         1
                     } else {
                         0
                     }
             }
-            Instruction::EQIR(a, b, c) => {
-                result.registers[*c as usize] = if *a == result.registers[*b as usize] {
+            Operation::EQIR => {
+                result.registers[i.c as usize] = if i.a == result.registers[i.b as usize] {
                     1
                 } else {
                     0
                 }
             }
-            Instruction::EQRI(a, b, c) => {
-                result.registers[*c as usize] = if result.registers[*a as usize] == *b {
+            Operation::EQRI => {
+                result.registers[i.c as usize] = if result.registers[i.a as usize] == i.b {
                     1
                 } else {
                     0
                 }
             }
-            Instruction::EQRR(a, b, c) => {
-                result.registers[*c as usize] =
-                    if result.registers[*a as usize] == result.registers[*b as usize] {
+            Operation::EQRR => {
+                result.registers[i.c as usize] =
+                    if result.registers[i.a as usize] == result.registers[i.b as usize] {
                         1
                     } else {
                         0
                     }
             }
-            _ => {}
+            _ => panic!("not implemented"),
         }
         result
     }
