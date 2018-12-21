@@ -57,7 +57,11 @@ pub fn num_recipes_before(input: &str) -> usize {
     recipes.push(7);
     let mut e1 = 0;
     let mut e2 = 1;
-    let suffix: Vec<u8> = input.trim().chars().map(|c| c.to_digit(10).unwrap() as u8).collect();
+    let suffix: Vec<u8> = input
+        .trim()
+        .chars()
+        .map(|c| c.to_digit(10).unwrap() as u8)
+        .collect();
     let mut found = 0;
     while found == 0 {
         let v1 = recipes[e1];
