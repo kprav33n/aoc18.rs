@@ -54,6 +54,7 @@ fn main() {
             Err(e) => println!("error: {}", e),
         },
         "day14a" => read_stdin_and_report_result(aoc18::day14::score_after),
+        "day14b" => read_stdin_and_report_result(aoc18::day14::num_recipes_before),
         "day16a" => read_stdin_and_report_result(aoc18::day16::num_samples),
         "day16b" => read_stdin_and_report_result(aoc18::day16::result_r0),
         _ => println!("Unknown command: {}", command),
