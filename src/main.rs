@@ -54,6 +54,9 @@ fn main() {
             Err(e) => println!("error: {}", e),
         },
         "day12a" => read_stdin_and_report_result(|x| aoc18::day12::sum_pots_after(x, 20)),
+        "day12b" => {
+            read_stdin_and_report_result(|x| aoc18::day12::sum_pots_after(x, 50_000_000_000))
+        }
         "day14a" => read_stdin_and_report_result(aoc18::day14::score_after),
         "day14b" => read_stdin_and_report_result(aoc18::day14::num_recipes_before),
         "day16a" => read_stdin_and_report_result(aoc18::day16::num_samples),

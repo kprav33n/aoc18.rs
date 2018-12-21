@@ -14,9 +14,12 @@ pub fn sum_pots_after(input: &str, gen: usize) -> i64 {
         .filter(|s| !s.is_empty())
         .map(|s| Mutation::from_str(s).unwrap())
         .collect();
-    for _ in 0..gen {
+    const UPTO: usize = 1000;
+    let offset = if gen > UPTO { gen - UPTO } else { 0 };
+    for _ in 0..std::cmp::min(gen, UPTO) {
         state.mutate(&mutations);
     }
+    state.start += offset as i64;
     state.state.iter().enumerate().fold(0, |acc, (i, x)| {
         if *x {
             acc + i as i64 + state.start
@@ -77,67 +80,23 @@ impl fmt::Display for Row {
 
 impl Row {
     fn mutate(&mut self, mutations: &Vec<Mutation>) {
-        match self
-            .state
-            .iter()
-            .take(4)
-            .cloned()
-            .collect::<Vec<bool>>()
-            .as_slice()
-        {
-            [true, _, _, _] => {
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.start -= 4;
-            }
-            [false, true, _, _] => {
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.start -= 3;
-            }
-            [false, false, true, _] => {
-                self.state.insert(0, false);
-                self.state.insert(0, false);
-                self.start -= 2;
-            }
-            [false, false, false, true] => {
-                self.state.insert(0, false);
-                self.start -= 1;
-            }
-            _ => {}
+        // Mark the positions of the first and last `true` value.
+        let mut fs = 0;
+        let mut ls = self.state.len() - 1;
+        while !self.state[fs] {
+            fs += 1;
         }
-        match self
-            .state
-            .iter()
-            .rev()
-            .take(4)
-            .cloned()
-            .collect::<Vec<bool>>()
-            .as_slice()
-        {
-            [true, _, _, _] => {
-                self.state.push(false);
-                self.state.push(false);
-                self.state.push(false);
-                self.state.push(false);
-            }
-            [false, true, _, _] => {
-                self.state.push(false);
-                self.state.push(false);
-                self.state.push(false);
-            }
-            [false, false, true, _] => {
-                self.state.push(false);
-                self.state.push(false);
-            }
-            [false, false, false, true] => {
-                self.state.push(false);
-            }
-            _ => {}
+        while !self.state[ls] {
+            ls -= 1;
         }
+
+        // Trim excessive `false` values in the beginning and end, and keep only
+        // 4 `false` values.
+        let mut drained: Vec<_> = self.state.drain(fs..=ls).collect();
+        self.state = vec![false; 4];
+        self.state.append(&mut drained);
+        self.state.append(&mut vec![false; 4]);
+        self.start += fs as i64 - 4;
 
         let mut muts = Vec::new();
         for i in 2..self.state.len() - 2 {
