@@ -35,11 +35,14 @@ pub fn steps(input: &str) -> String {
     // NOTE: Topological sort, Kahn's algorithm.
     // https://en.wikipedia.org/wiki/Topological_sorting
     let mut s = BTreeSet::new();
-    'outer: for n in deps.nodes() {
-        for _ in deps.neighbors_directed(n, petgraph::Incoming) {
-            continue 'outer;
+    for n in deps.nodes() {
+        if deps
+            .neighbors_directed(n, petgraph::Incoming)
+            .next()
+            .is_none()
+        {
+            s.insert(n);
         }
-        s.insert(n);
     }
 
     let mut l = Vec::new();
@@ -53,12 +56,15 @@ pub fn steps(input: &str) -> String {
             removals.push((n, m));
         }
 
-        'removal: for r in removals {
+        for r in removals {
             deps.remove_edge(r.0, r.1);
-            for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
-                continue 'removal;
+            if deps
+                .neighbors_directed(r.1, petgraph::Incoming)
+                .next()
+                .is_none()
+            {
+                s.insert(r.1);
             }
-            s.insert(r.1);
         }
     }
 
@@ -95,16 +101,19 @@ pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
         });
     let count = deps.nodes().fold(0, |acc, _| acc + 1);
 
-    let (tx, rx) = Crew::new(workers, factor);
+    let (tx, rx) = Crew::init(workers, factor);
 
     // NOTE: Topological sort, Kahn's algorithm.
     // https://en.wikipedia.org/wiki/Topological_sorting
     let mut s = BTreeSet::new();
-    'outer: for n in deps.nodes() {
-        for _ in deps.neighbors_directed(n, petgraph::Incoming) {
-            continue 'outer;
+    for n in deps.nodes() {
+        if deps
+            .neighbors_directed(n, petgraph::Incoming)
+            .next()
+            .is_none()
+        {
+            s.insert(n);
         }
-        s.insert(n);
     }
 
     let mut l = Vec::new();
@@ -126,12 +135,15 @@ pub fn completion_time(input: &str, workers: usize, factor: usize) -> usize {
                         removals.push((n, m));
                     }
 
-                    'removal: for r in removals {
+                    for r in removals {
                         deps.remove_edge(r.0, r.1);
-                        for _ in deps.neighbors_directed(r.1, petgraph::Incoming) {
-                            continue 'removal;
+                        if deps
+                            .neighbors_directed(r.1, petgraph::Incoming)
+                            .next()
+                            .is_none()
+                        {
+                            s.insert(r.1);
                         }
-                        s.insert(r.1);
                     }
                 }
             }
@@ -172,7 +184,7 @@ struct Crew {
 }
 
 impl Crew {
-    fn new(size: usize, factor: usize) -> (mpsc::Sender<char>, mpsc::Receiver<(char, usize)>) {
+    fn init(size: usize, factor: usize) -> (mpsc::Sender<char>, mpsc::Receiver<(char, usize)>) {
         let (tx_in, rx_in) = mpsc::channel();
         let (tx_out, rx_out) = mpsc::channel();
         let mut crew = Crew {

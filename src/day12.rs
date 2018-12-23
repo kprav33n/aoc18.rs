@@ -10,7 +10,7 @@ pub fn sum_pots_after(input: &str, gen: usize) -> i64 {
     let mut state = Row::from_str(init_state_str.trim()).unwrap();
     let mutations_str = parts[1];
     let mutations: Vec<Mutation> = mutations_str
-        .split("\n")
+        .split('\n')
         .filter(|s| !s.is_empty())
         .map(|s| Mutation::from_str(s).unwrap())
         .collect();
@@ -79,7 +79,7 @@ impl fmt::Display for Row {
 }
 
 impl Row {
-    fn mutate(&mut self, mutations: &Vec<Mutation>) {
+    fn mutate(&mut self, mutations: &[Mutation]) {
         // Mark the positions of the first and last `true` value.
         let mut fs = 0;
         let mut ls = self.state.len() - 1;
@@ -142,7 +142,7 @@ impl FromStr for Mutation {
         assert_eq!(state.len(), 5);
         Ok(Mutation {
             state,
-            result: if result_str == "#" { true } else { false },
+            result: result_str == "#",
         })
     }
 }

@@ -7,7 +7,7 @@ pub fn first_crash(input: &str) -> Point {
     let mut grids: Vec<Vec<Grid>> = input
         .split('\n')
         .filter(|s| !s.is_empty())
-        .map(|r| r.chars().map(|c| Grid::new(c)).collect())
+        .map(|r| r.chars().map(Grid::new).collect())
         .collect();
     // Pad a border.
     let columns = grids[0].len();
@@ -25,7 +25,7 @@ pub fn first_crash(input: &str) -> Point {
         .map(|(i, r)| {
             r.chars()
                 .enumerate()
-                .map(|(j, c)| Cart::new(c, j, i))
+                .map(|(j, c)| Cart::try_new(c, j, i))
                 .collect::<Vec<_>>()
         })
         .flatten()
@@ -36,7 +36,7 @@ pub fn first_crash(input: &str) -> Point {
         for cart in &mut carts {
             cart.next(&grids);
         }
-        match duplicate(
+        if let Some(p) = duplicate(
             &carts
                 .iter()
                 .map(|c| Point {
@@ -45,14 +45,10 @@ pub fn first_crash(input: &str) -> Point {
                 })
                 .collect::<Vec<_>>(),
         ) {
-            Some(p) => {
-                return Point {
-                    x: p.x - 1,
-                    y: p.y - 1,
-                };
-            }
-
-            _ => {}
+            return Point {
+                x: p.x - 1,
+                y: p.y - 1,
+            };
         }
     }
 }
@@ -118,7 +114,7 @@ struct Cart {
 }
 
 impl Cart {
-    fn new(ch: char, x: usize, y: usize) -> Option<Cart> {
+    fn try_new(ch: char, x: usize, y: usize) -> Option<Cart> {
         let point = Point { x: x + 1, y: y + 1 };
         let mut decisions = VecDeque::new();
         decisions.push_back(Decision::Left);
@@ -149,7 +145,7 @@ impl Cart {
         }
     }
 
-    fn next(&mut self, grid: &Vec<Vec<Grid>>) {
+    fn next(&mut self, grid: &[Vec<Grid>]) {
         match self.orientation {
             Orientation::Left => {
                 self.point.x -= 1;
@@ -238,11 +234,11 @@ fn duplicate(points: &[Point]) -> Option<Point> {
         }
         set.insert(p.clone());
     }
-    return None;
+    None
 }
 
 #[allow(dead_code)]
-fn print_state(grid: &Vec<Vec<Grid>>, carts: &Vec<Cart>) {
+fn print_state(grid: &[Vec<Grid>], carts: &[Cart]) {
     let mut map: Vec<Vec<char>> = grid
         .iter()
         .map(|r| {
@@ -268,7 +264,7 @@ fn print_state(grid: &Vec<Vec<Grid>>, carts: &Vec<Cart>) {
     for r in map {
         println!("{}", r.iter().collect::<String>());
     }
-    println!("");
+    println!();
 }
 
 #[test]

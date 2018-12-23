@@ -1,5 +1,5 @@
 use chrono::Timelike;
-use nom::{alt, call, do_parse, error_position, map_res, named, recognize, tag, take_while_m_n};
+use nom::{alt, call, do_parse, error_position, map_res, named, recognize, tag, take};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -205,7 +205,7 @@ named!(
 named!(
     time<&str, DateTime>,
     map_res!(
-        take_while_m_n!(16, 16, |_| true),
+        take!(16),
         |s: &str| DateTime::parse_from_str(s, "%Y-%m-%d %H:%M")
     )
 );

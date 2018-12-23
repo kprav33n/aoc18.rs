@@ -25,14 +25,13 @@ pub fn largest_area(input: &str) -> usize {
 
     const BOUND: usize = 500;
     let mut plane = [[(0 as i64, std::i64::MAX); BOUND]; BOUND];
-    for i in 0..BOUND {
-        for j in 0..BOUND {
+    for (i, r) in plane.iter_mut().enumerate() {
+        for (j, p) in r.iter_mut().enumerate() {
             for (n, c) in coordinates.iter().enumerate() {
                 let d = c.manhattan_distance(&Point {
                     x: i as i64,
                     y: j as i64,
                 });
-                let p = &mut plane[j][i];
                 if d < p.1 {
                     *p = (n as i64, d);
                 } else if d == p.1 && n as i64 != p.0 {
@@ -51,9 +50,8 @@ pub fn largest_area(input: &str) -> usize {
     }
 
     let mut counter = HashMap::new();
-    for i in 0..BOUND {
-        for j in 0..BOUND {
-            let p = &mut plane[j][i];
+    for r in plane.iter() {
+        for p in r.iter() {
             if !outliers.contains(&p.0) {
                 *counter.entry(p.0).or_insert(0) += 1;
             }
@@ -88,8 +86,8 @@ pub fn safe_area(input: &str, limit: i64) -> usize {
 
     const BOUND: usize = 500;
     let mut plane = [[0; BOUND]; BOUND];
-    for i in 0..BOUND {
-        for j in 0..BOUND {
+    for (i, r) in plane.iter_mut().enumerate() {
+        for (j, c) in r.iter_mut().enumerate() {
             let mut sum = 0;
             for c in coordinates.iter() {
                 let d = c.manhattan_distance(&Point {
@@ -98,14 +96,14 @@ pub fn safe_area(input: &str, limit: i64) -> usize {
                 });
                 sum += d;
             }
-            plane[j][i] = sum;
+            *c = sum;
         }
     }
 
     let mut result = 0;
-    for i in 0..BOUND {
-        for j in 0..BOUND {
-            if plane[i][j] < limit {
+    for r in plane.iter() {
+        for c in r.iter() {
+            if *c < limit {
                 result += 1;
             }
         }

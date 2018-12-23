@@ -14,8 +14,8 @@ pub fn largest_powered_cell(serial: &str) -> Point {
     let s = serial.trim().parse::<i64>().unwrap();
     const SIZE: usize = 300;
     let mut grid = [[0 as i64; SIZE]; SIZE];
-    for x in 0..SIZE {
-        for y in 0..SIZE {
+    for (x, r) in grid.iter_mut().enumerate() {
+        for (y, c) in r.iter_mut().enumerate() {
             let rack_id = (x as i64 + 1) + 10;
             // TODO: Simplify to a single expression.
             let mut power_level = rack_id * (y as i64 + 1);
@@ -23,7 +23,7 @@ pub fn largest_powered_cell(serial: &str) -> Point {
             power_level *= rack_id;
             power_level = (power_level % 1000) / 100;
             power_level -= 5;
-            grid[x][y] = power_level;
+            *c = power_level;
         }
     }
 
@@ -64,8 +64,8 @@ pub fn largest_powered_cell2(serial: &str) -> (Point, usize) {
     let s = serial.trim().parse::<i64>().unwrap();
     const SIZE: usize = 300;
     let mut grid = [[0 as i64; SIZE]; SIZE];
-    for x in 0..SIZE {
-        for y in 0..SIZE {
+    for (x, r) in grid.iter_mut().enumerate() {
+        for (y, c) in r.iter_mut().enumerate() {
             let rack_id = (x as i64 + 1) + 10;
             // TODO: Simplify to a single expression.
             let mut power_level = rack_id * (y as i64 + 1);
@@ -73,7 +73,7 @@ pub fn largest_powered_cell2(serial: &str) -> (Point, usize) {
             power_level *= rack_id;
             power_level = (power_level % 1000) / 100;
             power_level -= 5;
-            grid[x][y] = power_level;
+            *c = power_level;
         }
     }
 
