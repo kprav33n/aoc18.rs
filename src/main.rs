@@ -58,6 +58,7 @@ fn main() {
             read_stdin_and_report_result(|x| aoc18::day12::sum_pots_after(x, 50_000_000_000))
         }
         "day13a" => read_stdin_and_report_result(aoc18::day13::first_crash),
+        "day13b" => read_stdin_and_report_result(aoc18::day13::last_cart_location),
         "day14a" => read_stdin_and_report_result(aoc18::day14::score_after),
         "day14b" => read_stdin_and_report_result(aoc18::day14::num_recipes_before),
         "day16a" => read_stdin_and_report_result(aoc18::day16::num_samples),

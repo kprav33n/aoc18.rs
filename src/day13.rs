@@ -33,6 +33,7 @@ pub fn first_crash(input: &str) -> Point {
         .collect();
     loop {
         // print_state(&grids, &carts);
+        carts.sort_by(|a, b| (a.point.y * 1000 + a.point.x).cmp(&(b.point.y * 1000 + b.point.x)));
         for cart in &mut carts {
             cart.next(&grids);
         }
@@ -48,6 +49,77 @@ pub fn first_crash(input: &str) -> Point {
             return Point {
                 x: p.x - 1,
                 y: p.y - 1,
+            };
+        }
+    }
+}
+
+/// Find the location of the last remaining cart.
+pub fn last_cart_location(input: &str) -> Point {
+    let mut grids: Vec<Vec<Grid>> = input
+        .split('\n')
+        .filter(|s| !s.is_empty())
+        .map(|r| r.chars().map(Grid::new).collect())
+        .collect();
+    // Pad a border.
+    let columns = grids[0].len();
+    for r in &mut grids {
+        r.insert(0, Grid::NA);
+        r.push(Grid::NA);
+    }
+    grids.insert(0, vec![Grid::NA; columns + 2]);
+    grids.push(vec![Grid::NA; columns + 2]);
+
+    let mut carts: Vec<Cart> = input
+        .trim()
+        .split('\n')
+        .enumerate()
+        .map(|(i, r)| {
+            r.chars()
+                .enumerate()
+                .map(|(j, c)| Cart::try_new(c, j, i))
+                .collect::<Vec<_>>()
+        })
+        .flatten()
+        .filter_map(|o| o)
+        .collect();
+    loop {
+        // print_state(&grids, &carts);
+        let mut removed = HashSet::new();
+        carts.sort_by(|a, b| (a.point.y * 1000 + a.point.x).cmp(&(b.point.y * 1000 + b.point.x)));
+        for i in 0..carts.len() {
+            if removed.contains(&i) {
+                continue;
+            }
+            carts[i].next(&grids);
+            for d in duplicates(
+                &carts
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| !removed.contains(i))
+                    .map(|(_, c)| Point {
+                        x: c.point.x,
+                        y: c.point.y,
+                    })
+                    .collect::<Vec<_>>(),
+            ) {
+                for (j, c) in &mut carts.iter().enumerate() {
+                    if c.point == d {
+                        removed.insert(j);
+                    }
+                }
+            }
+        }
+        carts = carts
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !removed.contains(i))
+            .map(|(_, c)| c.clone())
+            .collect::<Vec<_>>();
+        if carts.len() == 1 {
+            return Point {
+                x: carts[0].point.x - 1,
+                y: carts[0].point.y - 1,
             };
         }
     }
@@ -91,7 +163,7 @@ impl Grid {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Orientation {
     Left,
     Right,
@@ -106,7 +178,7 @@ enum Decision {
     Right,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Cart {
     point: Point,
     orientation: Orientation,
@@ -237,6 +309,18 @@ fn duplicate(points: &[Point]) -> Option<Point> {
     None
 }
 
+fn duplicates(points: &[Point]) -> Vec<Point> {
+    let mut set: HashSet<Point> = HashSet::new();
+    let mut result = Vec::new();
+    for p in points {
+        if set.contains(p) {
+            result.push(p.clone());
+        }
+        set.insert(p.clone());
+    }
+    result
+}
+
 #[allow(dead_code)]
 fn print_state(grid: &[Vec<Grid>], carts: &[Cart]) {
     let mut map: Vec<Vec<char>> = grid
@@ -280,4 +364,36 @@ fn test_first_crash() {
     );
     assert_eq!(p.x, 7);
     assert_eq!(p.y, 3);
+}
+
+#[test]
+fn test_last_cart_location() {
+    let p = last_cart_location(
+        "/>-<\\  
+|   |  
+| /<+-\\
+| | | v
+\\>+</ |
+  |   ^
+  \\<->/
+",
+    );
+    assert_eq!(p.x, 6);
+    assert_eq!(p.y, 4);
+}
+
+#[test]
+fn test_last_cart_location_corner() {
+    let p = last_cart_location("/>>->\\");
+    assert_eq!(p.x, 5);
+    assert_eq!(p.y, 0);
+    let p = last_cart_location("/><->\\");
+    assert_eq!(p.x, 5);
+    assert_eq!(p.y, 0);
+    let p = last_cart_location("/->>>\\");
+    assert_eq!(p.x, 5);
+    assert_eq!(p.y, 0);
+    let p = last_cart_location("/->><\\");
+    assert_eq!(p.x, 3);
+    assert_eq!(p.y, 0);
 }
