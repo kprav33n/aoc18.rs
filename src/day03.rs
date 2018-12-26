@@ -43,7 +43,7 @@ pub fn overlapping_area(input: &str) -> u64 {
     result
 }
 
-/// Compute overlapping area for the given list of claims.
+/// Compute the intact claim from the given list of claims.
 ///
 /// # Examples
 ///

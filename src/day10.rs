@@ -1,7 +1,7 @@
 use regex::{Error, Regex};
 use std::str::FromStr;
 
-/// Find the winning Elf's score.
+/// Find the message, and number of seconds taken to reach that.
 ///
 /// # Examples
 ///

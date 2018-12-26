@@ -63,7 +63,7 @@ pub fn largest_area(input: &str) -> usize {
         .fold(0, |max, (_, &v)| if max < v { v } else { max })
 }
 
-/// Find the size of the largest finite area based on given list of coordinates.
+/// Find the safe area based on given list of coordinates.
 ///
 /// # Examples
 ///
