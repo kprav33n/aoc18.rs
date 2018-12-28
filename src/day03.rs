@@ -33,9 +33,9 @@ pub fn overlapping_area(input: &str) -> u64 {
         }
     }
     let mut result = 0;
-    for i in 0..BOUND {
-        for f in fabric.iter().take(BOUND) {
-            if f[i] > 1 {
+    for r in fabric.iter() {
+        for c in r.iter() {
+            if *c > 1 {
                 result += 1;
             }
         }
