@@ -48,18 +48,15 @@ pub fn common_letters(input: &str) -> String {
 
     for i in 0..(lines.len() - 1) {
         for j in (i + 1)..lines.len() {
-            match singleton_diff_index(lines[i], lines[j]) {
-                Some(x) => {
-                    return lines[i]
-                        .chars()
-                        .enumerate()
-                        .filter(|(p, _)| *p != x)
-                        .map(|(_, c)| c)
-                        .collect::<String>();
-                }
-                None => {
-                    continue;
-                }
+            if let Some(x) = singleton_diff_index(lines[i], lines[j]) {
+                return lines[i]
+                    .chars()
+                    .enumerate()
+                    .filter(|(p, _)| *p != x)
+                    .map(|(_, c)| c)
+                    .collect::<String>();
+            } else {
+                continue;
             }
         }
     }
