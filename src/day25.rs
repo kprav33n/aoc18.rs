@@ -1,6 +1,6 @@
-use std::str::FromStr;
-use petgraph::graphmap::UnGraphMap;
 use petgraph::algo::connected_components;
+use petgraph::graphmap::UnGraphMap;
+use std::str::FromStr;
 
 /// Find the number of constellations formed by the given points.
 pub fn num_constellations(input: &str) -> usize {

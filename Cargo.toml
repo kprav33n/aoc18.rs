@@ -7,5 +7,6 @@ edition = "2018"
 [dependencies]
 chrono = "0.4"
 nom = "4"
+pathfinding = "1"
 petgraph = "0.4"
 regex = "1"

@@ -61,6 +61,7 @@ fn main() {
         "day13b" => read_stdin_and_report_result(aoc18::day13::last_cart_location),
         "day14a" => read_stdin_and_report_result(aoc18::day14::score_after),
         "day14b" => read_stdin_and_report_result(aoc18::day14::num_recipes_before),
+        "day15a" => read_stdin_and_report_result(aoc18::day15::combat_outcome),
         "day16a" => read_stdin_and_report_result(aoc18::day16::num_samples),
         "day16b" => read_stdin_and_report_result(aoc18::day16::result_r0),
         "day25a" => read_stdin_and_report_result(aoc18::day25::num_constellations),
