@@ -62,9 +62,95 @@ use std::rc::Rc;
 /// "));
 /// ```
 pub fn combat_outcome(input: &str) -> usize {
-    let mut game = Game::new(input);
+    let mut game = Game::new(input, 3);
     while game.next_round() {}
     game.outcome()
+}
+
+/// Compute overlapping area for the given list of claims.
+///
+/// # Examples
+///
+/// ```
+/// use aoc18::day15::combat_outcome2;
+///
+/// assert_eq!(4988, combat_outcome2("#######
+/// #.G...#
+/// #...EG#
+/// #.#.#G#
+/// #..G#E#
+/// #.....#
+/// #######
+/// "));
+/// assert_eq!(31284, combat_outcome2("#######
+/// #E..EG#
+/// #.#G.E#
+/// #E.##E#
+/// #G..#.#
+/// #..E#.#
+/// #######
+/// "));
+/// assert_eq!(3478, combat_outcome2("#######
+/// #E.G#.#
+/// #.#G..#
+/// #G.#.G#
+/// #G..#.#
+/// #...E.#
+/// #######
+/// "));
+/// assert_eq!(6474, combat_outcome2("#######
+/// #.E...#
+/// #.#..G#
+/// #.###.#
+/// #E#G#G#
+/// #...#G#
+/// #######
+/// "));
+/// assert_eq!(1140, combat_outcome2("#########
+/// #G......#
+/// #.E.#...#
+/// #..##..G#
+/// #...##..#
+/// #...#...#
+/// #.G...G.#
+/// #.....G.#
+/// #########
+/// "));
+/// ```
+pub fn combat_outcome2(input: &str) -> usize {
+    let mut last_fail = 4;
+    let mut max = 100;
+    let mut current = last_fail;
+    let mut count = 0;
+    loop {
+        count += 1;
+        if count > 100 {
+            return 0;
+        }
+        let mut game = Game::new(input, current);
+        while game.next_round() {}
+        if game.units.iter().filter(|u| u.borrow().breed == "Elf" && u.borrow().hit_point() == 0).count() == 0 {
+            if current <= (last_fail + 1) {
+                return game.outcome();
+            } else {
+                max = current;
+            }
+            let revised = last_fail + (max - last_fail) / 2 ;
+            if current == revised {
+                current = revised - 1;
+            } else {
+                current = revised;
+            }
+        } else {
+            last_fail = current;
+            let revised = last_fail + (max - last_fail) / 2 ;
+            if current == revised {
+                current = revised + 1;
+            } else {
+                current = revised;
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -80,21 +166,24 @@ struct Unit {
     hit_point: usize,
     breed: String,
     point: Point,
+    power: usize,
 }
 
 impl Unit {
-    fn init(ch: char, x: usize, y: usize) -> Option<Rc<RefCell<Unit>>> {
+    fn init(ch: char, x: usize, y: usize, epower: usize) -> Option<Rc<RefCell<Unit>>> {
         let point = Point(x, y);
         match ch {
             'E' => Some(Rc::new(RefCell::new(Unit {
                 hit_point: 200,
                 breed: String::from("Elf"),
                 point,
+                power: epower,
             }))),
             'G' => Some(Rc::new(RefCell::new(Unit {
                 hit_point: 200,
                 breed: String::from("Goblin"),
                 point,
+                power: 3,
             }))),
             _ => None,
         }
@@ -104,9 +193,9 @@ impl Unit {
         self.hit_point
     }
 
-    fn take_hit(&mut self) {
-        if self.hit_point > 3 {
-            self.hit_point -= 3;
+    fn take_hit(&mut self, power: usize) {
+        if self.hit_point > power {
+            self.hit_point -= power;
         } else {
             self.hit_point = 0;
         }
@@ -169,7 +258,7 @@ impl fmt::Display for Game {
 }
 
 impl Game {
-    fn new(s: &str) -> Self {
+    fn new(s: &str, epower: usize) -> Self {
         Game {
             cells: s
                 .trim()
@@ -183,7 +272,7 @@ impl Game {
                 .map(|(i, l)| {
                     l.chars()
                         .enumerate()
-                        .map(|(j, c)| Unit::init(c, j, i))
+                        .map(|(j, c)| Unit::init(c, j, i, epower))
                         .collect::<Vec<_>>()
                 })
                 .flatten()
@@ -369,7 +458,7 @@ impl Game {
 
         if target != std::usize::MAX {
             let t = &self.units[target];
-            t.borrow_mut().take_hit();
+            t.borrow_mut().take_hit(u.borrow().power);
             if t.borrow().hit_point() == 0 {
                 let point = t.borrow().point.clone();
                 return (true, Some(point));
