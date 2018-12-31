@@ -67,6 +67,7 @@ fn main() {
         "day16b" => read_stdin_and_report_result(aoc18::day16::result_r0),
         "day17a" => read_stdin_and_report_result(aoc18::day17::reservoir_reach),
         "day17b" => read_stdin_and_report_result(aoc18::day17::reservoir_capacity),
+        "day18a" => read_stdin_and_report_result(aoc18::day18::resource_value),
         "day25a" => read_stdin_and_report_result(aoc18::day25::num_constellations),
         _ => println!("Unknown command: {}", command),
     }
