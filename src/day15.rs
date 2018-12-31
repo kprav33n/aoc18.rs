@@ -129,13 +129,19 @@ pub fn combat_outcome2(input: &str) -> usize {
         }
         let mut game = Game::new(input, current);
         while game.next_round() {}
-        if game.units.iter().filter(|u| u.borrow().breed == "Elf" && u.borrow().hit_point() == 0).count() == 0 {
+        if game
+            .units
+            .iter()
+            .filter(|u| u.borrow().breed == "Elf" && u.borrow().hit_point() == 0)
+            .count()
+            == 0
+        {
             if current <= (last_fail + 1) {
                 return game.outcome();
             } else {
                 max = current;
             }
-            let revised = last_fail + (max - last_fail) / 2 ;
+            let revised = last_fail + (max - last_fail) / 2;
             if current == revised {
                 current = revised - 1;
             } else {
@@ -143,7 +149,7 @@ pub fn combat_outcome2(input: &str) -> usize {
             }
         } else {
             last_fail = current;
-            let revised = last_fail + (max - last_fail) / 2 ;
+            let revised = last_fail + (max - last_fail) / 2;
             if current == revised {
                 current = revised + 1;
             } else {
