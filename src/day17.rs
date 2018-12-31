@@ -23,6 +23,29 @@ pub fn reservoir_reach(input: &str) -> usize {
     ground.reach()
 }
 
+/// Determine the number of stored water tiles in the given range of y values.
+///
+/// ```
+/// use aoc18::day17::reservoir_capacity;
+/// assert_eq!(29, reservoir_capacity("x=495, y=2..7
+/// y=7, x=495..501
+/// x=501, y=3..7
+/// x=498, y=2..4
+/// x=506, y=1..2
+/// x=498, y=10..13
+/// x=504, y=10..13
+/// y=13, x=498..504"));
+/// ```
+pub fn reservoir_capacity(input: &str) -> usize {
+    // todo: refactor part 1 and part 2.
+    let scans: Vec<Point> = input.trim().split('\n').map(parse_scan).flatten().collect();
+    let mut ground = Ground::new(&scans);
+    while !ground.can_end() {
+        ground.next_cycle();
+    }
+    ground.capacity()
+}
+
 #[derive(Clone, Debug)]
 enum Cell {
     Sand,
@@ -107,7 +130,7 @@ impl Ground {
     }
 
     fn next_cycle(&mut self) {
-        for i in 1..self.cells.len()-1 {
+        for i in 1..self.cells.len() - 1 {
             for j in 0..self.cells[i].len() {
                 match self.cells[i - 1][j] {
                     Cell::WaterSpring | Cell::WaterFlowing => {
@@ -120,22 +143,20 @@ impl Ground {
                     _ => {}
                 }
 
-                match (&self.cells[i][j], &self.cells[i+1][j]) {
-                    (Cell::WaterFlowing, Cell::Clay) |
-                    (Cell::WaterFlowing, Cell::WaterAtRest) => {
+                match (&self.cells[i][j], &self.cells[i + 1][j]) {
+                    (Cell::WaterFlowing, Cell::Clay) | (Cell::WaterFlowing, Cell::WaterAtRest) => {
                         let mut current = j - 1;
                         let mut left = None;
                         loop {
-                            match (&self.cells[i][current], &self.cells[i+1][current]) {
-                                (Cell::Sand, Cell::Clay) |
-                                (Cell::Sand, Cell::WaterAtRest) |
-                                (Cell::WaterFlowing, Cell::Clay) |
-                                (Cell::WaterFlowing, Cell::WaterAtRest) => {
+                            match (&self.cells[i][current], &self.cells[i + 1][current]) {
+                                (Cell::Sand, Cell::Clay)
+                                | (Cell::Sand, Cell::WaterAtRest)
+                                | (Cell::WaterFlowing, Cell::Clay)
+                                | (Cell::WaterFlowing, Cell::WaterAtRest) => {
                                     current -= 1;
                                 }
 
-                                (Cell::Clay, Cell::Clay) |
-                                (Cell::Clay, Cell::WaterAtRest) => {
+                                (Cell::Clay, Cell::Clay) | (Cell::Clay, Cell::WaterAtRest) => {
                                     left = Some(current);
                                     break;
                                 }
@@ -150,15 +171,14 @@ impl Ground {
                         current = j + 1;
                         let mut right = None;
                         loop {
-                            match (&self.cells[i][current], &self.cells[i+1][current]) {
-                                (Cell::Sand, Cell::Clay) |
-                                (Cell::Sand, Cell::WaterAtRest) |
-                                (Cell::WaterFlowing, Cell::Clay) |
-                                (Cell::WaterFlowing, Cell::WaterAtRest) => {
+                            match (&self.cells[i][current], &self.cells[i + 1][current]) {
+                                (Cell::Sand, Cell::Clay)
+                                | (Cell::Sand, Cell::WaterAtRest)
+                                | (Cell::WaterFlowing, Cell::Clay)
+                                | (Cell::WaterFlowing, Cell::WaterAtRest) => {
                                     current += 1;
                                 }
-                                (Cell::Clay, Cell::Clay) |
-                                (Cell::Clay, Cell::WaterAtRest) => {
+                                (Cell::Clay, Cell::Clay) | (Cell::Clay, Cell::WaterAtRest) => {
                                     right = Some(current);
                                     break;
                                 }
@@ -171,12 +191,12 @@ impl Ground {
 
                         match (left, right) {
                             (Some(l), Some(r)) => {
-                                for j in (l+1)..r {
+                                for j in (l + 1)..r {
                                     self.cells[i][j] = Cell::WaterAtRest;
                                 }
                             }
                             (Some(l), None) => {
-                                for j in (l+1)..=rlimit {
+                                for j in (l + 1)..=rlimit {
                                     self.cells[i][j] = Cell::WaterFlowing;
                                 }
                             }
@@ -199,12 +219,42 @@ impl Ground {
     }
 
     fn reach(&self) -> usize {
-        self.cells.iter().skip(self.top).flatten().filter(|c| match c { Cell::WaterFlowing | Cell::WaterAtRest => true, _ => false}).count()
+        self.cells
+            .iter()
+            .skip(self.top)
+            .flatten()
+            .filter(|c| match c {
+                Cell::WaterFlowing | Cell::WaterAtRest => true,
+                _ => false,
+            })
+            .count()
+    }
+
+    fn capacity(&self) -> usize {
+        self.cells
+            .iter()
+            .skip(self.top)
+            .flatten()
+            .filter(|c| {
+                if let Cell::WaterAtRest = c {
+                    true
+                } else {
+                    false
+                }
+            })
+            .count()
     }
 
     fn can_end(&self) -> bool {
         let l = self.cells.len();
-        self.cells[l-2].iter().filter(|c| match c { Cell::WaterFlowing | Cell::WaterAtRest => true, _ => false}).count() > 0
+        self.cells[l - 2]
+            .iter()
+            .filter(|c| match c {
+                Cell::WaterFlowing | Cell::WaterAtRest => true,
+                _ => false,
+            })
+            .count()
+            > 0
     }
 }
 
