@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
-/// Compute overlapping area for the given list of claims.
+/// Determine the combat outcome given the initial position.
 ///
 /// # Examples
 ///
@@ -67,7 +67,7 @@ pub fn combat_outcome(input: &str) -> usize {
     game.outcome()
 }
 
-/// Compute overlapping area for the given list of claims.
+/// Determine the rigged combat outcome given the initial position.
 ///
 /// # Examples
 ///
