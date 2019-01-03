@@ -383,11 +383,7 @@ impl Game {
                         |p| *p == adj,
                     ) {
                         let weight = adj.1 * 10_000 + adj.0;
-                        if min_length > path.len() {
-                            min_length = path.len();
-                            min_weight = weight;
-                            ideal_path = path;
-                        } else if min_length == path.len() && min_weight > weight {
+                        if min_length > path.len() || (min_length == path.len() && min_weight > weight) {
                             min_length = path.len();
                             min_weight = weight;
                             ideal_path = path;
@@ -396,7 +392,7 @@ impl Game {
                 }
             }
 
-            if ideal_path.len() > 0 {
+            if !ideal_path.is_empty() {
                 let mut min_weight = std::usize::MAX;
                 let mut new_point = Point(0, 0);
 
@@ -453,11 +449,9 @@ impl Game {
                 if v.borrow().point == adj
                     && v.borrow().breed != u.borrow().breed
                     && v.borrow().hit_point() > 0
-                {
-                    if min_hp > v.borrow().hit_point() {
+                    && min_hp > v.borrow().hit_point() {
                         min_hp = v.borrow().hit_point();
                         target = i;
-                    }
                 }
             }
         }

@@ -171,7 +171,7 @@ impl Acre {
 }
 
 #[allow(dead_code)]
-fn print_area(area: &Vec<Vec<Acre>>) {
+fn print_area(area: &[Vec<Acre>]) {
     let repr: String = area
         .iter()
         .map(|r| {
